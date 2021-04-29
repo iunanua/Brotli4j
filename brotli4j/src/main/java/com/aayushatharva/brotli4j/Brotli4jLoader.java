@@ -26,17 +26,24 @@ import java.nio.file.StandardCopyOption;
  */
 public class Brotli4jLoader {
 
-    private static final Throwable UNAVAILABILITY_CAUSE;
+    private static Throwable UNAVAILABILITY_CAUSE;
+    private static boolean loaded = false;
 
-    static {
-        Throwable cause = null;
-        try {
+    private static void loadLibrary(String platform) {
+    	if (loaded) {
+    		return;
+    	}
+    	
+    	Throwable cause = null;
+    	try {
             System.loadLibrary("brotli");
         } catch (Throwable t) {
             try {
                 String nativeLibName = System.mapLibraryName("brotli");
-                String libPath = "/lib/" + getPlatform() + "/" + nativeLibName;
+                String libPath = "/lib/" + platform + "/" + nativeLibName;
 
+                System.out.println("Brotli " + libPath);
+                
                 File tempDir = new File(System.getProperty("java.io.tmpdir"), "com_aayushatharva_brotli4j_" + System.nanoTime());
                 tempDir.mkdir();
                 tempDir.deleteOnExit();
@@ -47,7 +54,7 @@ public class Brotli4jLoader {
                     Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 } catch (Throwable throwable) {
                     tempFile.delete();
-                    throw throwable;
+                    throw new Exception(getInfo(), throwable);
                 }
 
                 System.load(tempFile.getAbsolutePath());
@@ -57,10 +64,10 @@ public class Brotli4jLoader {
                 cause = throwable;
             }
         }
-
-        UNAVAILABILITY_CAUSE = cause;
+    	UNAVAILABILITY_CAUSE = cause;
+    	loaded = true;
     }
-
+    
     /**
      * Returns {@code true} if the Brotli native library is available else {@code false}.
      */
@@ -74,11 +81,16 @@ public class Brotli4jLoader {
      * @throws UnsatisfiedLinkError If unavailable.
      */
     public static void ensureAvailability() {
+    	ensureAvailability(getPlatform());
+    }
+    
+    public static void ensureAvailability(String platform) {
         if (UNAVAILABILITY_CAUSE != null) {
             UnsatisfiedLinkError error = new UnsatisfiedLinkError("Failed to load Brotli native library");
             error.initCause(UNAVAILABILITY_CAUSE);
             throw error;
         }
+        loadLibrary(platform);
     }
 
     public static Throwable getUnavailabilityCause() {
@@ -90,7 +102,7 @@ public class Brotli4jLoader {
         String archName = System.getProperty("os.arch");
         if (osName.equalsIgnoreCase("Linux")) {
             if (archName.equalsIgnoreCase("amd64")) {
-                return "linux-x86_64";
+            	return "linux-x86_64";
             } else if (archName.equalsIgnoreCase("aarch64")) {
                 return "linux-aarch64";
             }
@@ -104,5 +116,13 @@ public class Brotli4jLoader {
             }
         }
         throw new UnsupportedOperationException("Unsupported OS and Architecture: " + osName + ", " + archName);
+    }
+    
+    private static String getInfo() {
+    	String osName = System.getProperty("os.name");
+        String archName = System.getProperty("os.arch");
+        String vendorName = System.getProperty("java.vendor");
+        
+        return osName + " " + archName + " " + vendorName;    	
     }
 }

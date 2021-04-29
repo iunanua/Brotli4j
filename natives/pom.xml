@@ -21,7 +21,7 @@ Copyright 2021, Aayush Atharva
     <parent>
         <groupId>com.aayushatharva.brotli4j</groupId>
         <artifactId>brotli4j-parent</artifactId>
-        <version>1.3.2</version>
+        <version>1.3.3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -32,17 +32,19 @@ Copyright 2021, Aayush Atharva
         <module>linux-aarch64</module>
         <module>windows-x86_64</module>
         <module>osx-x86_64</module>
+        <module>alpine-x86_64</module>
     </modules>
 
     <profiles>
         <profile>
             <id>linux-x86_64</id>
-            <activation>
+            <!-- activation>
                 <os>
                     <family>Linux</family>
                     <arch>amd64</arch>
                 </os>
             </activation>
+            -->
             <modules>
                 <module>linux-x86_64</module>
             </modules>
@@ -86,7 +88,19 @@ Copyright 2021, Aayush Atharva
                 <module>osx-x86_64</module>
             </modules>
         </profile>
-
+		<profile>
+            <id>alpine-x86_64</id>
+            <activation>
+                <os>
+                    <family>Linux</family>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <modules>
+                <module>alpine-x86_64</module>
+            </modules>
+        </profile>
+        
         <profile>
             <id>release</id>
             <modules>
@@ -94,6 +108,7 @@ Copyright 2021, Aayush Atharva
                 <module>linux-aarch64</module>
                 <module>windows-x86_64</module>
                 <module>osx-x86_64</module>
+                <module>alpine-x86_64</module>
             </modules>
         </profile>
     </profiles>

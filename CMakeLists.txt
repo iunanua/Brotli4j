@@ -12,6 +12,7 @@ endif()
 include_directories(${JNI_INCLUDE_DIRS})
 include_directories(${JNI_LIBRARIES})
 
+SET(CMAKE_VERBOSE_MAKEFILE ON)
 SET (BROTLI_INCLUDE_DIRS "brotli/include" "brotli/common")
 include_directories(${BROTLI_INCLUDE_DIRS})
 
